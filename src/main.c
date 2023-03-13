@@ -46,8 +46,39 @@ void createSplashScreen(lv_obj_t * scr) {
   // load splash screen
   lv_scr_load(scr);
   // transition to loadBootScreen after 1sec delay
-  lv_obj_del_delayed(labelWS, 2500);
-  printf("exit splash screen");
+  lv_obj_del_delayed(labelWS, 1000);
+  printf("exit splash screen\n");
+}
+
+void buildScreenLoad() {
+  printf("buildScreenLoad()\n");
+  lv_obj_t * scrLoad = lv_obj_create(NULL);
+  lv_obj_set_style_bg_color(scrLoad, lv_color_black(), LV_STATE_DEFAULT);
+
+  // TODO: Add logo
+  // Add logo text (TODO: Remove when we have bruce logo)
+  static lv_style_t styleText;
+  lv_style_init(&styleText);
+  lv_style_set_text_color(&styleText, lv_color_white());
+  lv_style_set_text_font(&styleText, &lv_font_montserrat_20); 
+
+  // add project label to screen
+  lv_obj_t *labelWS = lv_label_create(scrLoad);
+  lv_obj_add_style(labelWS, &styleText, LV_PART_MAIN);
+  lv_label_set_text(labelWS, "WipperSnapper");
+  lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
+  
+  // Add new style for grayed-out icons
+  static lv_style_t styleIconsGray;
+  lv_style_init(&styleIconsGray);
+  lv_style_set_text_color(&styleIconsGray, lv_color_hex(0x4D4A4A));
+
+  lv_obj_t *labelFile = lv_label_create(scrLoad);
+  lv_label_set_text(labelFile, LV_SYMBOL_FILE);
+  lv_obj_align(labelFile, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+
+  lv_scr_load(scrLoad);
+
 }
 
 void testScreens() {
@@ -55,8 +86,9 @@ void testScreens() {
   lv_obj_t * scrSplash = lv_obj_create(NULL);
   createSplashScreen(scrSplash);
 
-  lv_obj_t * scrLoad = lv_obj_create(NULL);
+  
   printf("Generate Load Screen");
+  buildScreenLoad();
   // TODO: call generate load
   // TODO: Delete splash screen after load screen is active?
 
