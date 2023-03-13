@@ -30,11 +30,8 @@ extern lv_font_t turtle2;
 // TODO: Mock a filesystem without WiFi credentials
 
 
-void createSplashScreen() {
-  // Create new screen
-  lv_obj_t * scrSplash = lv_obj_create(NULL);
-
-  lv_obj_set_style_bg_color(scrSplash, lv_color_black(), LV_STATE_DEFAULT);
+void createSplashScreen(lv_obj_t * scr) {
+  lv_obj_set_style_bg_color(scr, lv_color_black(), LV_STATE_DEFAULT);
   // Generate a splash screen
   // TODO: Waiting for bruce, using splash text instead
   static lv_style_t styleText;
@@ -42,26 +39,26 @@ void createSplashScreen() {
   lv_style_set_text_color(&styleText, lv_color_white());
   lv_style_set_text_font(&styleText, &lv_font_montserrat_20); 
   // add project label to screen
-  lv_obj_t *labelWS = lv_label_create(scrSplash);
+  lv_obj_t *labelWS = lv_label_create(scr);
   lv_obj_add_style(labelWS, &styleText, LV_PART_MAIN);
   lv_label_set_text(labelWS, "WipperSnapper");
   lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
   // load splash screen
-  lv_scr_load(scrSplash);
+  lv_scr_load(scr);
   // transition to loadBootScreen after 1sec delay
-
-  // TODO: Simulator hardfaults with lv_timer callbacks, this will need to be
-  // set up on-hardware instead
-  //lv_timer_t * timer = lv_timer_create(cleanSplashScreen, 2500,  &scrSplash);
+  lv_obj_del_delayed(labelWS, 2500);
+  printf("exit splash screen");
 }
 
 void testScreens() {
   printf("Creating Splash Screen...");
-  // TODO: Simulator hardfaults with lv_timer callbacks, this will need to be
-  // set up on-hardware using delay() instead of timer cb
-  // createSplashScreen();
-  printf("Generate Load Screen");
+  lv_obj_t * scrSplash = lv_obj_create(NULL);
+  createSplashScreen(scrSplash);
 
+  lv_obj_t * scrLoad = lv_obj_create(NULL);
+  printf("Generate Load Screen");
+  // TODO: call generate load
+  // TODO: Delete splash screen after load screen is active?
 
 }
 
