@@ -68,28 +68,42 @@ void createStatusbar(struct _lv_obj_t *screen) {
   lv_scr_load(screen);
 }
 
-void testScreens() {
-  // Create new screen
-  lv_obj_t * scr1 = lv_obj_create(NULL);
-  // Create and append status bar onto screen
-  createStatusbar(scr1);
-  // Display the splash icon
-  // TODO: Waiting for bruce, using splash text instead
+void loadBootScreen(lv_timer_t * timer) {
+  // delete the splash screen
+  lv_obj_del(timer->user_data);
 
-  lv_obj_t *labelWS = lv_label_create(scr1);
+  // create the boot screen, TODO: maybe do this in another function?
+  lv_obj_t * scr2 = lv_obj_create(NULL);
+  lv_scr_load(scr2);
+
+}
+
+void createSplashScreen() {
+  // Create new screen
+  lv_obj_t * scrSplash = lv_obj_create(NULL);
+
+  lv_obj_set_style_bg_color(scrSplash, lv_color_black(), LV_STATE_DEFAULT);
+  // Generate a splash screen
+  // TODO: Waiting for bruce, using splash text instead
   static lv_style_t styleText;
   lv_style_init(&styleText);
   lv_style_set_text_color(&styleText, lv_color_white());
-
-  // This is casuing an issue, why?
   lv_style_set_text_font(&styleText, &lv_font_montserrat_20); 
-
-
+  // add project label to screen
+  lv_obj_t *labelWS = lv_label_create(scrSplash);
   lv_obj_add_style(labelWS, &styleText, LV_PART_MAIN);
-
-
   lv_label_set_text(labelWS, "WipperSnapper");
   lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
+  // load splash screen
+  lv_scr_load(scrSplash);
+
+  // transition to loadBootScreen after 2500ms delay
+  lv_timer_t * timer = lv_timer_create(loadBootScreen, 2500,  &scrSplash);
+}
+
+void testScreens() {
+
+  createSplashScreen();
 
 }
 
@@ -98,12 +112,7 @@ int main(void)
   lv_init();
   hal_setup();
 
-  // TODO: Splash
-
-  // TODO: Add function within actual LVGL glue to
-  // read the display config & settings from display.json file
-
-  //createStatusbar();
+  // Step through the boot sequence
   testScreens();
 
   // Mock checking provisioning status
