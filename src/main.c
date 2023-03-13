@@ -12,10 +12,17 @@
 #include "lvgl.h"
 #include "app_hal.h"
 #include <stdio.h>
+#include <unistd.h>
 
-//extern lv_font_t turtle;
+
 extern lv_font_t turtle2;
 #define TURTLE_SYMBOL "\xEF\x9C\xA6"
+
+extern lv_font_t file_code;
+#define SYMBOL_CODE "\xEF\x87\x89"
+
+extern lv_font_t wifi_30px;
+#define SYMBOL_WIFI "\xEF\x87\xAB"
 
 // Mock credentials
 #define AIO_USERNAME "aioUser"
@@ -46,17 +53,70 @@ void createSplashScreen(lv_obj_t * scr) {
   // load splash screen
   lv_scr_load(scr);
   // transition to loadBootScreen after 1sec delay
-  lv_obj_del_delayed(labelWS, 2500);
-  printf("exit splash screen");
+  //lv_obj_del_delayed(labelWS, 1500);
+  lv_obj_del_delayed(labelWS, 5000);
+
+  printf("exit splash screen\n");
+}
+
+void buildScreenLoad() {
+  lv_obj_t * scrLoad = lv_obj_create(NULL);
+
+  lv_obj_set_style_bg_color(scrLoad, lv_color_black(), LV_STATE_DEFAULT);
+
+  static lv_style_t styleText;
+  lv_style_init(&styleText);
+  lv_style_set_text_color(&styleText, lv_color_white());
+  lv_style_set_text_font(&styleText, &lv_font_montserrat_20); 
+
+  // add project label to screen
+  lv_obj_t *labelWS = lv_label_create(scrLoad);
+  lv_obj_add_style(labelWS, &styleText, LV_PART_MAIN);
+  lv_label_set_text(labelWS, "WipperSnapper");
+  lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
+
+  // Icon bar
+  lv_coord_t iconBarXStart = 28;
+  lv_coord_t iconBarYOffset = -66;
+  int iconBarXSpaces = 40; // +40 between icons
+
+  // add symbol_code (30px) to represent settings.json
+  // TODO :see how to inline define a style?
+  static lv_style_t styleIcon;
+  lv_style_init(&styleIcon);
+  lv_style_set_text_color(&styleIcon, lv_palette_main(LV_PALETTE_GREY));
+
+  lv_obj_t *labelIconFile = lv_label_create(scrLoad);
+  lv_style_set_text_font(&styleIcon, &file_code); 
+  lv_label_set_text(labelIconFile, SYMBOL_CODE);
+  lv_obj_add_style(labelIconFile, &styleIcon, LV_PART_MAIN);
+  lv_obj_align(labelIconFile, LV_ALIGN_BOTTOM_LEFT, iconBarXStart, iconBarYOffset);
+
+  // add symbol_wifi (30px) to represent wifi connect
+  static lv_style_t styleIconWiFi;
+  lv_style_init(&styleIconWiFi);
+  lv_style_set_text_color(&styleIconWiFi, lv_palette_main(LV_PALETTE_GREY));
+  lv_obj_t *labelWiFi = lv_label_create(scrLoad);
+  lv_style_set_text_font(&styleIconWiFi, &wifi_30px); 
+  lv_label_set_text(labelWiFi, SYMBOL_WIFI);
+  lv_obj_add_style(labelWiFi, &styleIconWiFi, LV_PART_MAIN);
+  lv_obj_align(labelWiFi, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+iconBarXSpaces, iconBarYOffset);
+
+
+
+  lv_scr_load(scrLoad);
+
 }
 
 void testScreens() {
-  printf("Creating Splash Screen...");
+  printf("Creating Splash Screen...\n");
   lv_obj_t * scrSplash = lv_obj_create(NULL);
   createSplashScreen(scrSplash);
 
-  lv_obj_t * scrLoad = lv_obj_create(NULL);
-  printf("Generate Load Screen");
+  //lv_obj_t * scrLoad = lv_obj_create(NULL);
+  // maybe we are having issues bc we dont call timer handler/lv_task_handler
+  printf("Building Load Screen...\n");
+  buildScreenLoad();
   // TODO: call generate load
   // TODO: Delete splash screen after load screen is active?
 
