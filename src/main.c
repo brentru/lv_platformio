@@ -29,6 +29,8 @@ extern lv_font_t turtle_30px;
 extern lv_font_t cloud_30px;
 #define SYMBOL_CLOUD "\xEF\x83\x82"
 
+extern lv_font_t circle_30px;
+#define SYMBOL_CHECKMARK "\xEF\x81\x98"
 
 // Mock credentials
 #define AIO_USERNAME "aioUser"
@@ -81,7 +83,7 @@ void buildScreenLoad() {
   lv_label_set_text(labelWS, "WipperSnapper");
   lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
 
-  // Icon bar
+  // Icon bar offset and spacing
   lv_coord_t iconBarXStart = 28;
   lv_coord_t iconBarYOffset = -66;
   int iconBarXSpaces = 40; // +40 between icons
@@ -130,10 +132,15 @@ void buildScreenLoad() {
   lv_obj_add_style(labelCloudBar, &styleIconCloud, LV_PART_MAIN);
   lv_obj_align(labelCloudBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*3), iconBarYOffset);
 
-
-  // TODO: Move fonts into folder!
-
-  // TODO: add symbol circle-check 30px
+  // Add circle checkmark
+  static lv_style_t styleIconCheckmark;
+  lv_style_init(&styleIconCheckmark);
+  lv_style_set_text_color(&styleIconCheckmark, lv_palette_main(LV_PALETTE_GREY));
+  lv_obj_t *labelCircleBar = lv_label_create(scrLoad);
+  lv_style_set_text_font(&styleIconCheckmark, &circle_30px); 
+  lv_label_set_text(labelCircleBar, SYMBOL_CHECKMARK);
+  lv_obj_add_style(labelCircleBar, &styleIconCheckmark, LV_PART_MAIN);
+  lv_obj_align(labelCircleBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*4), iconBarYOffset);
 
   lv_scr_load(scrLoad);
 
