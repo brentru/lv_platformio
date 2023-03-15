@@ -71,6 +71,9 @@ void setBackgroundBlack(lv_obj_t *screen) {
   lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
 }
 
+// Styles used by the loading screen, need to be global or static
+static lv_style_t styleIconFile, styleIconWiFi, styleIconTurtle30px, styleIconCloud, styleIconCheckmark;
+
 void buildScreenLoad() {
   lv_obj_t * scrLoad = lv_obj_create(NULL);
 
@@ -97,19 +100,16 @@ void buildScreenLoad() {
   lv_obj_t *labelIconFile = lv_label_create(scrLoad);
   lv_label_set_text(labelIconFile, SYMBOL_CODE);
   // formatting
-  static lv_style_t styleIcon;
-  lv_style_init(&styleIcon);
-  lv_style_set_text_color(&styleIcon, lv_palette_main(LV_PALETTE_GREY));
-  lv_style_set_text_font(&styleIcon, &file_code);   
-  lv_obj_add_style(labelIconFile, &styleIcon, LV_PART_MAIN);
+  lv_style_init(&styleIconFile);
+  lv_style_set_text_color(&styleIconFile, lv_palette_main(LV_PALETTE_GREY));
+  lv_style_set_text_font(&styleIconFile, &file_code);   
+  lv_obj_add_style(labelIconFile, &styleIconFile, LV_PART_MAIN);
   lv_obj_align(labelIconFile, LV_ALIGN_BOTTOM_LEFT, iconBarXStart, iconBarYOffset);
 
 
   // add symbol_wifi (30px) to represent wifi connect
   lv_obj_t *labelWiFi = lv_label_create(scrLoad);
   lv_label_set_text(labelWiFi, SYMBOL_WIFI);
-
-  static lv_style_t styleIconWiFi;
   lv_style_init(&styleIconWiFi);
   lv_style_set_text_color(&styleIconWiFi, lv_palette_main(LV_PALETTE_GREY));
   lv_style_set_text_font(&styleIconWiFi, &wifi_30px); 
@@ -120,18 +120,16 @@ void buildScreenLoad() {
   lv_obj_t *labelTurtleBar = lv_label_create(scrLoad);
   lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE30PX);
 
-  static lv_style_t styleIconTurtle30;
-  lv_style_init(&styleIconTurtle30);
-  lv_style_set_text_color(&styleIconTurtle30, lv_palette_main(LV_PALETTE_GREY));
-  lv_style_set_text_font(&styleIconTurtle30, &turtle_30px); 
-  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30, LV_PART_MAIN); //28+(33*2) = 94
+  lv_style_init(&styleIconTurtle30px);
+  lv_style_set_text_color(&styleIconTurtle30px, lv_palette_main(LV_PALETTE_GREY));
+  lv_style_set_text_font(&styleIconTurtle30px, &turtle_30px); 
+  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30px, LV_PART_MAIN); //28+(33*2) = 94
   lv_obj_align(labelTurtleBar, LV_ALIGN_BOTTOM_LEFT, 106, iconBarYOffset);
 
   // Add cloud
   lv_obj_t *labelCloudBar = lv_label_create(scrLoad);
   lv_label_set_text(labelCloudBar, SYMBOL_CLOUD);
 
-  static lv_style_t styleIconCloud;
   lv_style_init(&styleIconCloud);
   lv_style_set_text_color(&styleIconCloud, lv_palette_main(LV_PALETTE_GREY));
   lv_style_set_text_font(&styleIconCloud, &cloud_30px); 
@@ -142,7 +140,6 @@ void buildScreenLoad() {
   lv_obj_t *labelCircleBar = lv_label_create(scrLoad);
   lv_label_set_text(labelCircleBar, SYMBOL_CHECKMARK);
 
-  static lv_style_t styleIconCheckmark;
   lv_style_init(&styleIconCheckmark);
   lv_style_set_text_color(&styleIconCheckmark, lv_palette_main(LV_PALETTE_GREY));
   lv_style_set_text_font(&styleIconCheckmark, &circle_30px); 
@@ -150,6 +147,20 @@ void buildScreenLoad() {
   lv_obj_align(labelCircleBar, LV_ALIGN_BOTTOM_LEFT, 160+33, iconBarYOffset);
 
   lv_scr_load(scrLoad);
+}
+
+// Changes a symbol's color to the "task complete" color
+void setIconComplete(lv_style_t *iconStyle) {
+  lv_style_set_text_color(iconStyle, lv_palette_main(LV_PALETTE_GREEN));
+}
+
+// Clear all properties from the icon bar styles and free all allocated memories
+void resetIconBarStyles() {
+  lv_style_reset(&styleIconFile);
+  lv_style_reset(&styleIconWiFi);
+  lv_style_reset(&styleIconTurtle30px);
+  lv_style_reset(&styleIconCloud);
+  lv_style_reset(&styleIconCheckmark);
 }
 
 void testScreens() {
@@ -160,9 +171,9 @@ void testScreens() {
   printf("Building Load Screen...\n");
   buildScreenLoad();
 
-  // TODO: Add re-coloring for each of the icons on the load screen
-
-
+  // Can pass in each icon style to transform it as the loading screen
+  // progresses
+  setIconComplete(&styleIconFile);
 }
 
 int main(void)
