@@ -67,10 +67,14 @@ void createSplashScreen(lv_obj_t * scr) {
   printf("exit splash screen\n");
 }
 
+void setBackgroundBlack(lv_obj_t *screen) {
+  lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
+}
+
 void buildScreenLoad() {
   lv_obj_t * scrLoad = lv_obj_create(NULL);
 
-  lv_obj_set_style_bg_color(scrLoad, lv_color_black(), LV_STATE_DEFAULT);
+  setBackgroundBlack(scrLoad);
 
   static lv_style_t styleText;
   lv_style_init(&styleText);
@@ -89,61 +93,62 @@ void buildScreenLoad() {
   int iconBarXSpaces = 40; // +40 between icons
 
   // add symbol_code (30px) to represent settings.json
-  // TODO :see how to inline define a style?
+  lv_obj_t *labelIconFile = lv_label_create(scrLoad);
+  lv_label_set_text(labelIconFile, SYMBOL_CODE);
+  // formatting
   static lv_style_t styleIcon;
   lv_style_init(&styleIcon);
   lv_style_set_text_color(&styleIcon, lv_palette_main(LV_PALETTE_GREY));
-
-  lv_obj_t *labelIconFile = lv_label_create(scrLoad);
-  lv_style_set_text_font(&styleIcon, &file_code); 
-  lv_label_set_text(labelIconFile, SYMBOL_CODE);
+  lv_style_set_text_font(&styleIcon, &file_code);   
   lv_obj_add_style(labelIconFile, &styleIcon, LV_PART_MAIN);
   lv_obj_align(labelIconFile, LV_ALIGN_BOTTOM_LEFT, iconBarXStart, iconBarYOffset);
-  lv_scr_load(scrLoad);
 
 
   // add symbol_wifi (30px) to represent wifi connect
+  lv_obj_t *labelWiFi = lv_label_create(scrLoad);
+  lv_label_set_text(labelWiFi, SYMBOL_WIFI);
+
   static lv_style_t styleIconWiFi;
   lv_style_init(&styleIconWiFi);
   lv_style_set_text_color(&styleIconWiFi, lv_palette_main(LV_PALETTE_GREY));
-  lv_obj_t *labelWiFi = lv_label_create(scrLoad);
   lv_style_set_text_font(&styleIconWiFi, &wifi_30px); 
-  lv_label_set_text(labelWiFi, SYMBOL_WIFI);
   lv_obj_add_style(labelWiFi, &styleIconWiFi, LV_PART_MAIN);
-  lv_obj_align(labelWiFi, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+iconBarXSpaces, iconBarYOffset);
+  lv_obj_align(labelWiFi, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*1), iconBarYOffset);
 
   // Add symbol turtle 30px
+  lv_obj_t *labelTurtleBar = lv_label_create(scrLoad);
+  lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE30PX);
+
   static lv_style_t styleIconTurtle30;
   lv_style_init(&styleIconTurtle30);
   lv_style_set_text_color(&styleIconTurtle30, lv_palette_main(LV_PALETTE_GREY));
-  lv_obj_t *labelTurtleBar = lv_label_create(scrLoad);
   lv_style_set_text_font(&styleIconTurtle30, &turtle_30px); 
-  lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE30PX);
   lv_obj_add_style(labelTurtleBar, &styleIconTurtle30, LV_PART_MAIN);
   lv_obj_align(labelTurtleBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*2), iconBarYOffset);
 
   // Add cloud
+  lv_obj_t *labelCloudBar = lv_label_create(scrLoad);
+  lv_label_set_text(labelCloudBar, SYMBOL_CLOUD);
+
   static lv_style_t styleIconCloud;
   lv_style_init(&styleIconCloud);
   lv_style_set_text_color(&styleIconCloud, lv_palette_main(LV_PALETTE_GREY));
-  lv_obj_t *labelCloudBar = lv_label_create(scrLoad);
   lv_style_set_text_font(&styleIconCloud, &cloud_30px); 
-  lv_label_set_text(labelCloudBar, SYMBOL_CLOUD);
   lv_obj_add_style(labelCloudBar, &styleIconCloud, LV_PART_MAIN);
   lv_obj_align(labelCloudBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*3), iconBarYOffset);
 
   // Add circle checkmark
+  lv_obj_t *labelCircleBar = lv_label_create(scrLoad);
+  lv_label_set_text(labelCircleBar, SYMBOL_CHECKMARK);
+
   static lv_style_t styleIconCheckmark;
   lv_style_init(&styleIconCheckmark);
   lv_style_set_text_color(&styleIconCheckmark, lv_palette_main(LV_PALETTE_GREY));
-  lv_obj_t *labelCircleBar = lv_label_create(scrLoad);
   lv_style_set_text_font(&styleIconCheckmark, &circle_30px); 
-  lv_label_set_text(labelCircleBar, SYMBOL_CHECKMARK);
   lv_obj_add_style(labelCircleBar, &styleIconCheckmark, LV_PART_MAIN);
   lv_obj_align(labelCircleBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*4), iconBarYOffset);
 
   lv_scr_load(scrLoad);
-
 }
 
 void testScreens() {
