@@ -32,18 +32,11 @@ extern lv_font_t cloud_30px;
 extern lv_font_t circle_30px;
 #define SYMBOL_CHECKMARK "\xEF\x81\x98"
 
-// Mock credentials
-#define AIO_USERNAME "aioUser"
-#define AIO_KEY "aioKey"
-#define SSID "mySSID"
-#define SSID_PASS "SSIDPass"
+extern lv_font_t errorTriangle;
+#define SYMBOL_ERROR_TRIANGLE "\xEF\x81\xB1"
 
-// TODO: Mock secrets.json file not able to be deserialized
-// TODO: Mock a filesystem with AIO credentials
-// TODO: Mock a filesystem without AIO credentials
-// TODO: Mock a filesystem with WiFi credentials
-// TODO: Mock a filesystem without WiFi credentials
-
+#define ERR_NO_JSON_HEADER "Secrets.json file not found!"
+#define ERR_NO_JSON_INSTRUCTIONS "1. Visit adafru.it/123456 to generate a settings.json file.\n2.Drag and drop the secrets.json file to the WIPPER drive.\n3. Press RESET on your board."
 
 void createSplashScreen(lv_obj_t * scr) {
   lv_obj_set_style_bg_color(scr, lv_color_black(), LV_STATE_DEFAULT);
@@ -149,11 +142,6 @@ void buildScreenLoad() {
   lv_scr_load(scrLoad);
 }
 
-// Changes a symbol's color to the "task complete" color
-void setIconComplete(lv_style_t *iconStyle) {
-  lv_style_set_text_color(iconStyle, lv_palette_main(LV_PALETTE_GREEN));
-}
-
 // Clear all properties from the icon bar styles and free all allocated memories
 void resetIconBarStyles() {
   lv_style_reset(&styleIconFile);
@@ -163,17 +151,74 @@ void resetIconBarStyles() {
   lv_style_reset(&styleIconCheckmark);
 }
 
-void testScreens() {
-//  printf("Creating Splash Screen...\n");
-//  lv_obj_t * scrSplash = lv_obj_create(NULL);
-//  createSplashScreen(scrSplash);
+// Changes a symbol's color to the "task complete" color
+void setIconComplete(lv_style_t *iconStyle) {
+  lv_style_set_text_color(iconStyle, lv_palette_main(LV_PALETTE_GREEN));
+}
 
-  printf("Building Load Screen...\n");
-  buildScreenLoad();
+// TODO: Can we make this type of thing reusable whenever we need to set up an error?
+lv_obj_t * buildScreenError(char *errorHeader, char *errorInstructions) {
+  lv_obj_t * scrError = lv_obj_create(NULL);
+  setBackgroundBlack(scrError);
+
+  // Add circle checkmark
+  lv_obj_t *labelErrorTriangle = lv_label_create(scrError);
+  lv_label_set_text(labelErrorTriangle, SYMBOL_ERROR_TRIANGLE);
+
+  static lv_style_t styleErrorTriangle;
+  lv_style_init(&styleErrorTriangle);
+  lv_style_set_text_color(&styleErrorTriangle, lv_color_white());
+  lv_style_set_text_font(&styleErrorTriangle, &errorTriangle); 
+  lv_obj_add_style(labelErrorTriangle, &styleErrorTriangle, LV_PART_MAIN);
+  lv_obj_align(labelErrorTriangle, LV_ALIGN_TOP_MID, 0, 30);
+
+
+  // Label (error heading)
+  lv_obj_t *labelErrorHeader = lv_label_create(scrError);
+  lv_label_set_text(labelErrorHeader, errorHeader);
+
+  static lv_style_t styleTextBig;
+  lv_style_init(&styleTextBig);
+  lv_style_set_text_color(&styleTextBig, lv_color_white());
+  lv_style_set_text_font(&styleTextBig, &lv_font_montserrat_16); 
+  lv_obj_add_style(labelErrorHeader, &styleTextBig, LV_PART_MAIN);
+  lv_obj_align(labelErrorHeader, LV_ALIGN_CENTER, 0, 10);
+
+
+  // Label (error text box)
+  lv_obj_t *labelErrorBody = lv_label_create(scrError);
+  lv_label_set_long_mode(labelErrorBody, LV_LABEL_LONG_WRAP);
+  lv_label_set_text(labelErrorBody, errorInstructions);
+
+  static lv_style_t styleErrorText;
+  lv_style_init(&styleErrorText);
+  lv_style_set_text_color(&styleErrorText, lv_color_white());
+  lv_style_set_text_font(&styleErrorText, &lv_font_montserrat_12); 
+  lv_obj_add_style(labelErrorBody, &styleErrorText, LV_PART_MAIN);
+  // small width to allow LABEL_LONG_WRAP
+  lv_obj_set_width(labelErrorBody, 220);
+  lv_obj_align(labelErrorBody, LV_ALIGN_CENTER, 0, 65);
+
+
+  return scrError;
+}
+
+void testScreens() {
+  //  printf("Creating Splash Screen...\n");
+  //  lv_obj_t * scrSplash = lv_obj_create(NULL);
+  //  createSplashScreen(scrSplash);
+
+  // printf("Building Load Screen...\n");
+  // buildScreenLoad();
 
   // Can pass in each icon style to transform it as the loading screen
   // progresses
-  setIconComplete(&styleIconFile);
+  //setIconComplete(&styleIconFile);
+
+  // Generate an error screen
+  lv_obj_t * scrError = buildScreenError(ERR_NO_JSON_HEADER, ERR_NO_JSON_INSTRUCTIONS);
+  // Load the error screen
+  lv_scr_load(scrError);
 }
 
 int main(void)
