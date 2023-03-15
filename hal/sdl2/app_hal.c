@@ -26,6 +26,10 @@ static int tick_thread(void * data)
 }
 
 
+void hal_delay(Uint32 millis) {
+    SDL_Delay(millis);
+}
+
 void hal_setup(void)
 {
     // Workaround for sdl2 `-m32` crash

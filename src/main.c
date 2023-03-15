@@ -12,17 +12,23 @@
 #include "lvgl.h"
 #include "app_hal.h"
 #include <stdio.h>
-#include <unistd.h>
 
 
 extern lv_font_t turtle2;
-#define TURTLE_SYMBOL "\xEF\x9C\xA6"
+#define SYMBOL_TURTLE "\xEF\x9C\xA6"
 
 extern lv_font_t file_code;
 #define SYMBOL_CODE "\xEF\x87\x89"
 
 extern lv_font_t wifi_30px;
 #define SYMBOL_WIFI "\xEF\x87\xAB"
+
+extern lv_font_t turtle_30px;
+#define SYMBOL_TURTLE30PX "\xEF\x9C\xA6"
+
+extern lv_font_t cloud_30px;
+#define SYMBOL_CLOUD "\xEF\x83\x82"
+
 
 // Mock credentials
 #define AIO_USERNAME "aioUser"
@@ -91,6 +97,8 @@ void buildScreenLoad() {
   lv_label_set_text(labelIconFile, SYMBOL_CODE);
   lv_obj_add_style(labelIconFile, &styleIcon, LV_PART_MAIN);
   lv_obj_align(labelIconFile, LV_ALIGN_BOTTOM_LEFT, iconBarXStart, iconBarYOffset);
+  lv_scr_load(scrLoad);
+
 
   // add symbol_wifi (30px) to represent wifi connect
   static lv_style_t styleIconWiFi;
@@ -102,7 +110,30 @@ void buildScreenLoad() {
   lv_obj_add_style(labelWiFi, &styleIconWiFi, LV_PART_MAIN);
   lv_obj_align(labelWiFi, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+iconBarXSpaces, iconBarYOffset);
 
+  // Add symbol turtle 30px
+  static lv_style_t styleIconTurtle30;
+  lv_style_init(&styleIconTurtle30);
+  lv_style_set_text_color(&styleIconTurtle30, lv_palette_main(LV_PALETTE_GREY));
+  lv_obj_t *labelTurtleBar = lv_label_create(scrLoad);
+  lv_style_set_text_font(&styleIconTurtle30, &turtle_30px); 
+  lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE30PX);
+  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30, LV_PART_MAIN);
+  lv_obj_align(labelTurtleBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*2), iconBarYOffset);
 
+  // Add cloud
+  static lv_style_t styleIconCloud;
+  lv_style_init(&styleIconCloud);
+  lv_style_set_text_color(&styleIconCloud, lv_palette_main(LV_PALETTE_GREY));
+  lv_obj_t *labelCloudBar = lv_label_create(scrLoad);
+  lv_style_set_text_font(&styleIconCloud, &cloud_30px); 
+  lv_label_set_text(labelCloudBar, SYMBOL_CLOUD);
+  lv_obj_add_style(labelCloudBar, &styleIconCloud, LV_PART_MAIN);
+  lv_obj_align(labelCloudBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*3), iconBarYOffset);
+
+
+  // TODO: Move fonts into folder!
+
+  // TODO: add symbol circle-check 30px
 
   lv_scr_load(scrLoad);
 
