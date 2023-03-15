@@ -162,6 +162,7 @@ lv_obj_t * buildScreenError(char *errorHeader, char *errorInstructions) {
   setBackgroundBlack(scrError);
 
   // Add circle checkmark
+  // TODO: Allow other icons to be set within this function
   lv_obj_t *labelErrorTriangle = lv_label_create(scrError);
   lv_label_set_text(labelErrorTriangle, SYMBOL_ERROR_TRIANGLE);
 
@@ -205,8 +206,7 @@ lv_obj_t * buildScreenError(char *errorHeader, char *errorInstructions) {
 
 void testScreens() {
   //  printf("Creating Splash Screen...\n");
-  //  lv_obj_t * scrSplash = lv_obj_create(NULL);
-  //  createSplashScreen(scrSplash);
+
 
   // printf("Building Load Screen...\n");
   // buildScreenLoad();
@@ -215,10 +215,18 @@ void testScreens() {
   // progresses
   //setIconComplete(&styleIconFile);
 
+
+
+  lv_obj_t * scrSplash = lv_obj_create(NULL);
+  createSplashScreen(scrSplash);
+  
   // Generate an error screen
   lv_obj_t * scrError = buildScreenError(ERR_NO_JSON_HEADER, ERR_NO_JSON_INSTRUCTIONS);
   // Load the error screen
-  lv_scr_load(scrError);
+  // lv_scr_load(scrError);
+  lv_scr_load_anim(scrError, LV_SCR_LOAD_ANIM_MOVE_LEFT, 10, 2500, true);
+
+
 }
 
 int main(void)
