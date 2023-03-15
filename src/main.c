@@ -76,21 +76,22 @@ void buildScreenLoad() {
 
   setBackgroundBlack(scrLoad);
 
+  // TODO: This should be replaced by Image/Bruce's logo
+  // add project label to screen
+  lv_obj_t *labelWS = lv_label_create(scrLoad);
+  lv_label_set_text(labelWS, "WipperSnapper");
+
   static lv_style_t styleText;
   lv_style_init(&styleText);
   lv_style_set_text_color(&styleText, lv_color_white());
   lv_style_set_text_font(&styleText, &lv_font_montserrat_20); 
-
-  // add project label to screen
-  lv_obj_t *labelWS = lv_label_create(scrLoad);
   lv_obj_add_style(labelWS, &styleText, LV_PART_MAIN);
-  lv_label_set_text(labelWS, "WipperSnapper");
   lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
 
   // Icon bar offset and spacing
   lv_coord_t iconBarXStart = 28;
   lv_coord_t iconBarYOffset = -66;
-  int iconBarXSpaces = 40; // +40 between icons
+  int iconBarXSpaces = 33; // +10 exactly between icons
 
   // add symbol_code (30px) to represent settings.json
   lv_obj_t *labelIconFile = lv_label_create(scrLoad);
@@ -123,8 +124,8 @@ void buildScreenLoad() {
   lv_style_init(&styleIconTurtle30);
   lv_style_set_text_color(&styleIconTurtle30, lv_palette_main(LV_PALETTE_GREY));
   lv_style_set_text_font(&styleIconTurtle30, &turtle_30px); 
-  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30, LV_PART_MAIN);
-  lv_obj_align(labelTurtleBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*2), iconBarYOffset);
+  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30, LV_PART_MAIN); //28+(33*2) = 94
+  lv_obj_align(labelTurtleBar, LV_ALIGN_BOTTOM_LEFT, 106, iconBarYOffset);
 
   // Add cloud
   lv_obj_t *labelCloudBar = lv_label_create(scrLoad);
@@ -135,7 +136,7 @@ void buildScreenLoad() {
   lv_style_set_text_color(&styleIconCloud, lv_palette_main(LV_PALETTE_GREY));
   lv_style_set_text_font(&styleIconCloud, &cloud_30px); 
   lv_obj_add_style(labelCloudBar, &styleIconCloud, LV_PART_MAIN);
-  lv_obj_align(labelCloudBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*3), iconBarYOffset);
+  lv_obj_align(labelCloudBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(106+13), iconBarYOffset);
 
   // Add circle checkmark
   lv_obj_t *labelCircleBar = lv_label_create(scrLoad);
@@ -146,22 +147,21 @@ void buildScreenLoad() {
   lv_style_set_text_color(&styleIconCheckmark, lv_palette_main(LV_PALETTE_GREY));
   lv_style_set_text_font(&styleIconCheckmark, &circle_30px); 
   lv_obj_add_style(labelCircleBar, &styleIconCheckmark, LV_PART_MAIN);
-  lv_obj_align(labelCircleBar, LV_ALIGN_BOTTOM_LEFT, iconBarXStart+(iconBarXSpaces*4), iconBarYOffset);
+  lv_obj_align(labelCircleBar, LV_ALIGN_BOTTOM_LEFT, 160+33, iconBarYOffset);
 
   lv_scr_load(scrLoad);
 }
 
 void testScreens() {
-  printf("Creating Splash Screen...\n");
-  lv_obj_t * scrSplash = lv_obj_create(NULL);
-  createSplashScreen(scrSplash);
+//  printf("Creating Splash Screen...\n");
+//  lv_obj_t * scrSplash = lv_obj_create(NULL);
+//  createSplashScreen(scrSplash);
 
-  //lv_obj_t * scrLoad = lv_obj_create(NULL);
-  // maybe we are having issues bc we dont call timer handler/lv_task_handler
   printf("Building Load Screen...\n");
   buildScreenLoad();
-  // TODO: call generate load
-  // TODO: Delete splash screen after load screen is active?
+
+  // TODO: Add re-coloring for each of the icons on the load screen
+
 
 }
 
