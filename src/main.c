@@ -35,29 +35,21 @@ extern lv_font_t circle_30px;
 extern lv_font_t errorTriangle;
 #define SYMBOL_ERROR_TRIANGLE "\xEF\x81\xB1"
 
+LV_IMG_DECLARE(ws_icon_100px);
+LV_IMG_DECLARE(ws_logo_200px);
+
+// Error strings
 #define ERR_NO_JSON_HEADER "Secrets.json file not found!"
 #define ERR_NO_JSON_INSTRUCTIONS "1. Visit adafru.it/123456 to generate a settings.json file.\n2.Drag and drop the secrets.json file to the WIPPER drive.\n3. Press RESET on your board."
 
 void createSplashScreen(lv_obj_t * scr) {
   lv_obj_set_style_bg_color(scr, lv_color_black(), LV_STATE_DEFAULT);
-  // Generate a splash screen
-  // TODO: Waiting for bruce, using splash text instead
-  static lv_style_t styleText;
-  lv_style_init(&styleText);
-  lv_style_set_text_color(&styleText, lv_color_white());
-  lv_style_set_text_font(&styleText, &lv_font_montserrat_20); 
-  // add project label to screen
-  lv_obj_t *labelWS = lv_label_create(scr);
-  lv_obj_add_style(labelWS, &styleText, LV_PART_MAIN);
-  lv_label_set_text(labelWS, "WipperSnapper");
-  lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
-  // load splash screen
-  lv_scr_load(scr);
-  // transition to loadBootScreen after 1sec delay
-  //lv_obj_del_delayed(labelWS, 1500);
-  lv_obj_del_delayed(labelWS, 5000);
 
-  printf("exit splash screen\n");
+  // create and center the full logo (200px)
+  lv_obj_t * icon = lv_img_create(scr);
+  lv_img_set_src(icon, &ws_logo_200px);
+  lv_obj_align(icon, LV_ALIGN_CENTER, 0, 0);
+  lv_scr_load(scr);
 }
 
 void setBackgroundBlack(lv_obj_t *screen) {
@@ -72,21 +64,14 @@ void buildScreenLoad() {
 
   setBackgroundBlack(scrLoad);
 
-  // TODO: This should be replaced by Image/Bruce's logo
-  // add project label to screen
-  lv_obj_t *labelWS = lv_label_create(scrLoad);
-  lv_label_set_text(labelWS, "WipperSnapper");
+  lv_obj_t * icon = lv_img_create(scrLoad);
+  lv_img_set_src(icon, &ws_icon_100px);
+  lv_obj_align(icon, LV_ALIGN_TOP_MID, 0, 5);
 
-  static lv_style_t styleText;
-  lv_style_init(&styleText);
-  lv_style_set_text_color(&styleText, lv_color_white());
-  lv_style_set_text_font(&styleText, &lv_font_montserrat_20); 
-  lv_obj_add_style(labelWS, &styleText, LV_PART_MAIN);
-  lv_obj_align(labelWS, LV_ALIGN_CENTER, 0, 0);
 
   // Icon bar offset and spacing
   lv_coord_t iconBarXStart = 28;
-  lv_coord_t iconBarYOffset = -66;
+  lv_coord_t iconBarYOffset = -45; // gives us room for text, too
   int iconBarXSpaces = 33; // +10 exactly between icons
 
   // add symbol_code (30px) to represent settings.json
@@ -209,7 +194,7 @@ void testScreens() {
 
 
   // printf("Building Load Screen...\n");
-  // buildScreenLoad();
+  buildScreenLoad();
 
   // Can pass in each icon style to transform it as the loading screen
   // progresses
@@ -217,14 +202,13 @@ void testScreens() {
 
 
 
-  lv_obj_t * scrSplash = lv_obj_create(NULL);
-  createSplashScreen(scrSplash);
-  
+  //lv_obj_t * scrSplash = lv_obj_create(NULL);
+  //createSplashScreen(scrSplash);
+
   // Generate an error screen
-  lv_obj_t * scrError = buildScreenError(ERR_NO_JSON_HEADER, ERR_NO_JSON_INSTRUCTIONS);
+  //lv_obj_t * scrError = buildScreenError(ERR_NO_JSON_HEADER, ERR_NO_JSON_INSTRUCTIONS);
   // Load the error screen
-  // lv_scr_load(scrError);
-  lv_scr_load_anim(scrError, LV_SCR_LOAD_ANIM_MOVE_LEFT, 10, 2500, true);
+  //lv_scr_load_anim(scrError, LV_SCR_LOAD_ANIM_NONE, 10, 2500, true);
 
 
 }
