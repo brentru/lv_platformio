@@ -50,7 +50,6 @@ void createSplashScreen(lv_obj_t *scr) {
   lv_obj_t *icon = lv_img_create(scr);
   lv_img_set_src(icon, &ws_logo_200px);
   lv_obj_align(icon, LV_ALIGN_CENTER, 0, 0);
-  lv_scr_load(scr);
 }
 
 void setBackgroundBlack(lv_obj_t *screen) {
@@ -61,22 +60,21 @@ void setBackgroundBlack(lv_obj_t *screen) {
 static lv_style_t styleIconFile, styleIconWiFi, styleIconTurtle30px,
     styleIconCloud, styleIconCheckmark;
 
-void buildScreenLoad() {
-  lv_obj_t *scrLoad = lv_obj_create(NULL);
+void buildScreenLoad(lv_obj_t *scr) {
 
-  setBackgroundBlack(scrLoad);
+  lv_obj_set_style_bg_color(scr, lv_color_black(), LV_STATE_DEFAULT);
 
-  lv_obj_t *icon = lv_img_create(scrLoad);
+  lv_obj_t *icon = lv_img_create(scr);
   lv_img_set_src(icon, &ws_icon_100px);
   lv_obj_align(icon, LV_ALIGN_TOP_MID, 0, 5);
 
   // Icon bar offset and spacing
-  lv_coord_t iconBarXStart = 28;
-  lv_coord_t iconBarYOffset = -45; // gives us room for text, too
-  int iconBarXSpaces = 33;         // +10 exactly between icons
+  const lv_coord_t iconBarXStart = 28;
+  const lv_coord_t iconBarYOffset = -45; // gives us room for text, too
+  const int iconBarXSpaces = 33;         // +10 exactly between icons
 
   // add symbol_code (30px) to represent settings.json
-  lv_obj_t *labelIconFile = lv_label_create(scrLoad);
+  lv_obj_t *labelIconFile = lv_label_create(scr);
   lv_label_set_text(labelIconFile, SYMBOL_CODE);
   // formatting
   lv_style_init(&styleIconFile);
@@ -87,7 +85,7 @@ void buildScreenLoad() {
                iconBarYOffset);
 
   // add symbol_wifi (30px) to represent wifi connect
-  lv_obj_t *labelWiFi = lv_label_create(scrLoad);
+  lv_obj_t *labelWiFi = lv_label_create(scr);
   lv_label_set_text(labelWiFi, SYMBOL_WIFI);
   lv_style_init(&styleIconWiFi);
   lv_style_set_text_color(&styleIconWiFi, lv_palette_main(LV_PALETTE_GREY));
@@ -97,7 +95,7 @@ void buildScreenLoad() {
                iconBarXStart + (iconBarXSpaces * 1), iconBarYOffset);
 
   // Add symbol turtle 30px
-  lv_obj_t *labelTurtleBar = lv_label_create(scrLoad);
+  lv_obj_t *labelTurtleBar = lv_label_create(scr);
   lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE30PX);
 
   lv_style_init(&styleIconTurtle30px);
@@ -109,7 +107,7 @@ void buildScreenLoad() {
   lv_obj_align(labelTurtleBar, LV_ALIGN_BOTTOM_LEFT, 106, iconBarYOffset);
 
   // Add cloud
-  lv_obj_t *labelCloudBar = lv_label_create(scrLoad);
+  lv_obj_t *labelCloudBar = lv_label_create(scr);
   lv_label_set_text(labelCloudBar, SYMBOL_CLOUD);
 
   lv_style_init(&styleIconCloud);
@@ -120,7 +118,7 @@ void buildScreenLoad() {
                iconBarYOffset);
 
   // Add circle checkmark
-  lv_obj_t *labelCircleBar = lv_label_create(scrLoad);
+  lv_obj_t *labelCircleBar = lv_label_create(scr);
   lv_label_set_text(labelCircleBar, SYMBOL_CHECKMARK);
 
   lv_style_init(&styleIconCheckmark);
@@ -129,8 +127,6 @@ void buildScreenLoad() {
   lv_style_set_text_font(&styleIconCheckmark, &circle_30px);
   lv_obj_add_style(labelCircleBar, &styleIconCheckmark, LV_PART_MAIN);
   lv_obj_align(labelCircleBar, LV_ALIGN_BOTTOM_LEFT, 160 + 33, iconBarYOffset);
-
-  lv_scr_load(scrLoad);
 }
 
 // Clear all properties from the icon bar styles and free all allocated memories
@@ -194,23 +190,21 @@ lv_obj_t *buildScreenError(char *errorHeader, char *errorInstructions) {
 }
 
 void testScreens() {
-  //  printf("Creating Splash Screen...\n");
+  // Build splash screen
+  lv_obj_t *scrSplash = lv_obj_create(NULL);
+  createSplashScreen(scrSplash);
+  // Load splash screen
+  lv_scr_load(scrSplash);
 
-  // printf("Building Load Screen...\n");
-  buildScreenLoad();
-
-  // Can pass in each icon style to transform it as the loading screen
-  // progresses
-  // setIconComplete(&styleIconFile);
-
-  // lv_obj_t * scrSplash = lv_obj_create(NULL);
-  // createSplashScreen(scrSplash);
+  // Build loading screen
+  lv_obj_t *scrLoading = lv_obj_create(NULL);
+  buildScreenLoad(scrLoading);
+  // Switch from Splash screen to the Loading screen and delete Splash screen
+  lv_scr_load_anim(scrLoading, LV_SCR_LOAD_ANIM_NONE, 100, 2500, true);
 
   // Generate an error screen
   // lv_obj_t * scrError = buildScreenError(ERR_NO_JSON_HEADER,
   // ERR_NO_JSON_INSTRUCTIONS);
-  // Load the error screen
-  // lv_scr_load_anim(scrError, LV_SCR_LOAD_ANIM_NONE, 10, 2500, true);
 }
 
 int main(void) {
