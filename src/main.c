@@ -43,38 +43,45 @@ LV_IMG_DECLARE(ws_logo_200px);
   "drop the secrets.json file to the WIPPER drive.\n3. Press RESET on your "   \
   "board."
 
-void createSplashScreen(lv_obj_t *scr) {
-  lv_obj_set_style_bg_color(scr, lv_color_black(), LV_STATE_DEFAULT);
 
-  // create and center the full logo (200px)
-  lv_obj_t *icon = lv_img_create(scr);
-  lv_img_set_src(icon, &ws_logo_200px);
-  lv_obj_align(icon, LV_ALIGN_CENTER, 0, 0);
-}
+lv_timer_t* splashTask;
+lv_obj_t *splashImg;
 
-void setBackgroundBlack(lv_obj_t *screen) {
-  lv_obj_set_style_bg_color(screen, lv_color_black(), LV_STATE_DEFAULT);
-}
+lv_obj_t *labelIconFile, *labelWiFi;
 
 // Styles used by the loading screen, need to be global or static
-static lv_style_t styleIconFile, styleIconWiFi, styleIconTurtle30px,
-    styleIconCloud, styleIconCheckmark;
+static lv_style_t styleIconFile, styleIconWiFi, styleIconTurtle30px, styleIconCloud, styleIconCheckmark;
 
-void buildScreenLoad(lv_obj_t *scr) {
+// Icon bar offset and spacing
+const lv_coord_t iconBarXStart = 28;
+const lv_coord_t iconBarYOffset = -45; // gives us room for text, too
+const int iconBarXSpaces = 33;         // +10 exactly between icons
 
-  lv_obj_set_style_bg_color(scr, lv_color_black(), LV_STATE_DEFAULT);
+void make_wifi_green(lv_timer_t * timer) {
+    lv_style_set_text_color(&styleIconWiFi, lv_palette_main(LV_PALETTE_GREEN));
+    lv_obj_add_style(labelWiFi, &styleIconWiFi, LV_PART_MAIN);
+    lv_timer_del(timer);
+}
 
-  lv_obj_t *icon = lv_img_create(scr);
+void make_file_green(lv_timer_t * timer) {
+    lv_style_set_text_color(&styleIconFile, lv_palette_main(LV_PALETTE_GREEN));
+    lv_obj_add_style(labelIconFile, &styleIconFile, LV_PART_MAIN);
+    lv_timer_del(timer);
+
+    lv_timer_create(make_wifi_green, 1000, NULL);
+}
+
+void load_task(lv_timer_t * timer) {
+  // remove the splash screen (TODO: do this in another func.)
+  lv_obj_del(splashImg);
+
+  // adding loading screen image
+  lv_obj_t *icon = lv_img_create(lv_scr_act());
   lv_img_set_src(icon, &ws_icon_100px);
   lv_obj_align(icon, LV_ALIGN_TOP_MID, 0, 5);
 
-  // Icon bar offset and spacing
-  const lv_coord_t iconBarXStart = 28;
-  const lv_coord_t iconBarYOffset = -45; // gives us room for text, too
-  const int iconBarXSpaces = 33;         // +10 exactly between icons
-
   // add symbol_code (30px) to represent settings.json
-  lv_obj_t *labelIconFile = lv_label_create(scr);
+  labelIconFile = lv_label_create(lv_scr_act());
   lv_label_set_text(labelIconFile, SYMBOL_CODE);
   // formatting
   lv_style_init(&styleIconFile);
@@ -85,7 +92,7 @@ void buildScreenLoad(lv_obj_t *scr) {
                iconBarYOffset);
 
   // add symbol_wifi (30px) to represent wifi connect
-  lv_obj_t *labelWiFi = lv_label_create(scr);
+  labelWiFi = lv_label_create(lv_scr_act());
   lv_label_set_text(labelWiFi, SYMBOL_WIFI);
   lv_style_init(&styleIconWiFi);
   lv_style_set_text_color(&styleIconWiFi, lv_palette_main(LV_PALETTE_GREY));
@@ -95,7 +102,7 @@ void buildScreenLoad(lv_obj_t *scr) {
                iconBarXStart + (iconBarXSpaces * 1), iconBarYOffset);
 
   // Add symbol turtle 30px
-  lv_obj_t *labelTurtleBar = lv_label_create(scr);
+  lv_obj_t *labelTurtleBar = lv_label_create(lv_scr_act());
   lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE30PX);
 
   lv_style_init(&styleIconTurtle30px);
@@ -107,7 +114,7 @@ void buildScreenLoad(lv_obj_t *scr) {
   lv_obj_align(labelTurtleBar, LV_ALIGN_BOTTOM_LEFT, 106, iconBarYOffset);
 
   // Add cloud
-  lv_obj_t *labelCloudBar = lv_label_create(scr);
+  lv_obj_t *labelCloudBar = lv_label_create(lv_scr_act());
   lv_label_set_text(labelCloudBar, SYMBOL_CLOUD);
 
   lv_style_init(&styleIconCloud);
@@ -118,7 +125,7 @@ void buildScreenLoad(lv_obj_t *scr) {
                iconBarYOffset);
 
   // Add circle checkmark
-  lv_obj_t *labelCircleBar = lv_label_create(scr);
+  lv_obj_t *labelCircleBar = lv_label_create(lv_scr_act());
   lv_label_set_text(labelCircleBar, SYMBOL_CHECKMARK);
 
   lv_style_init(&styleIconCheckmark);
@@ -127,92 +134,35 @@ void buildScreenLoad(lv_obj_t *scr) {
   lv_style_set_text_font(&styleIconCheckmark, &circle_30px);
   lv_obj_add_style(labelCircleBar, &styleIconCheckmark, LV_PART_MAIN);
   lv_obj_align(labelCircleBar, LV_ALIGN_BOTTOM_LEFT, 160 + 33, iconBarYOffset);
+
+  lv_timer_del(timer);
+
+  // simulate event loop
+  lv_timer_create(make_file_green, 2500, NULL);
 }
 
-// Clear all properties from the icon bar styles and free all allocated memories
-void resetIconBarStyles() {
-  lv_style_reset(&styleIconFile);
-  lv_style_reset(&styleIconWiFi);
-  lv_style_reset(&styleIconTurtle30px);
-  lv_style_reset(&styleIconCloud);
-  lv_style_reset(&styleIconCheckmark);
+void splash_task(lv_timer_t * timer) {
+  // create and load splash screen 
+  
+  // create and center the full logo (200px
+  splashImg = lv_img_create(lv_scr_act());
+  lv_img_set_src(splashImg, &ws_logo_200px);
+  lv_obj_align(splashImg, LV_ALIGN_CENTER, 0, 0);
+
+  lv_timer_del(timer); // one-shot task, delete
+
+  // add load_task to timer handler
+  lv_timer_create(load_task, 2500, NULL);
 }
 
-// Changes a symbol's color to the "task complete" color
-void setIconComplete(lv_style_t *iconStyle) {
-  lv_style_set_text_color(iconStyle, lv_palette_main(LV_PALETTE_GREEN));
-}
-
-// TODO: Can we make this type of thing reusable whenever we need to set up an
-// error?
-lv_obj_t *buildScreenError(char *errorHeader, char *errorInstructions) {
-  lv_obj_t *scrError = lv_obj_create(NULL);
-  setBackgroundBlack(scrError);
-
-  // Add circle checkmark
-  // TODO: Allow other icons to be set within this function
-  lv_obj_t *labelErrorTriangle = lv_label_create(scrError);
-  lv_label_set_text(labelErrorTriangle, SYMBOL_ERROR_TRIANGLE);
-
-  static lv_style_t styleErrorTriangle;
-  lv_style_init(&styleErrorTriangle);
-  lv_style_set_text_color(&styleErrorTriangle, lv_color_white());
-  lv_style_set_text_font(&styleErrorTriangle, &errorTriangle);
-  lv_obj_add_style(labelErrorTriangle, &styleErrorTriangle, LV_PART_MAIN);
-  lv_obj_align(labelErrorTriangle, LV_ALIGN_TOP_MID, 0, 30);
-
-  // Label (error heading)
-  lv_obj_t *labelErrorHeader = lv_label_create(scrError);
-  lv_label_set_text(labelErrorHeader, errorHeader);
-
-  static lv_style_t styleTextBig;
-  lv_style_init(&styleTextBig);
-  lv_style_set_text_color(&styleTextBig, lv_color_white());
-  lv_style_set_text_font(&styleTextBig, &lv_font_montserrat_16);
-  lv_obj_add_style(labelErrorHeader, &styleTextBig, LV_PART_MAIN);
-  lv_obj_align(labelErrorHeader, LV_ALIGN_CENTER, 0, 10);
-
-  // Label (error text box)
-  lv_obj_t *labelErrorBody = lv_label_create(scrError);
-  lv_label_set_long_mode(labelErrorBody, LV_LABEL_LONG_WRAP);
-  lv_label_set_text(labelErrorBody, errorInstructions);
-
-  static lv_style_t styleErrorText;
-  lv_style_init(&styleErrorText);
-  lv_style_set_text_color(&styleErrorText, lv_color_white());
-  lv_style_set_text_font(&styleErrorText, &lv_font_montserrat_12);
-  lv_obj_add_style(labelErrorBody, &styleErrorText, LV_PART_MAIN);
-  // small width to allow LABEL_LONG_WRAP
-  lv_obj_set_width(labelErrorBody, 220);
-  lv_obj_align(labelErrorBody, LV_ALIGN_CENTER, 0, 65);
-
-  return scrError;
-}
-
-void testScreens() {
-  // Build splash screen
-  lv_obj_t *scrSplash = lv_obj_create(NULL);
-  createSplashScreen(scrSplash);
-  // Load splash screen
-  lv_scr_load(scrSplash);
-
-  // Build loading screen
-  lv_obj_t *scrLoading = lv_obj_create(NULL);
-  buildScreenLoad(scrLoading);
-  // Switch from Splash screen to the Loading screen and delete Splash screen
-  lv_scr_load_anim(scrLoading, LV_SCR_LOAD_ANIM_NONE, 100, 2500, true);
-
-  // Generate an error screen
-  // lv_obj_t * scrError = buildScreenError(ERR_NO_JSON_HEADER,
-  // ERR_NO_JSON_INSTRUCTIONS);
-}
 
 int main(void) {
   lv_init();
   hal_setup();
 
-  // Step through the boot sequence
-  testScreens();
+  lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_STATE_DEFAULT);
+  
+  splashTask = lv_timer_create(splash_task, 0, NULL);
 
   // HAL loop
   hal_loop();
