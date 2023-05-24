@@ -26,39 +26,43 @@ LV_FONT_DECLARE(cloud_30px);
 
 static lv_obj_t * consoleLabel;
 
-// Text buffer of 6 lines with 40 characters each
-// TODO: These numbers may change, not sure if accurate
-#define TEXT_BUFFER_HEIGHT 40
-#define TEXT_BUFFER_WIDTH 20
-// TODO: This should be [] not NxN [][]
-//static char * textBuffer[TEXT_BUFFER_WIDTH][TEXT_BUFFER_HEIGHT] = {{" "}};
-//static char *textBuffer[513]; // 512 characters + '\0' null char.
-static char textBuffer[512 + 1];
 
-/**
- * Add data to the terminal
- * @param txt_in character sting to add to the terminal
- */
-void terminal_add(const char * txt_in)
+#define TEXT_BUFFER_SIZE 512
+static char textBuffer[TEXT_BUFFER_SIZE + 1]; // + '\0'
+
+#define DISPLAY_WIDTH 240
+
+int i = 0;
+
+// Adds data to the monitor
+void monitor_add(const char * txt_in)
 {
+    // size of text passed into this function
+    size_t input_txt_len = strlen(txt_in);
+    // size of textBuffer as it currently stands
+    size_t prv_buffer_len = strlen(textBuffer);
 
-    size_t txt_len = strlen(txt_in);
-    size_t old_len = strlen(textBuffer);
+    // TODO
+    // is the data longer than the label's width?
+/*     if (input_txt_len > DISPLAY_WIDTH) {
+      // trim the input text down to DISPLAY_WIDTH
 
-    /*If the data is longer then the terminal ax size show the last part of data*/
-    if(txt_len > 512) {
-        txt_in += (txt_len - 512);
-        txt_len = 512;
-        old_len = 0;
-    }
+      // modify the buffer to show "..." at the end instead
+      
+      // re-calculate input_text_len with the new txt_in
+      input_txt_len = strlen(txt_in);
+    } */
+
     /*If the text become too long 'forget' the oldest lines*/
-    else if(old_len + txt_len > 512) {
+
+    // Does the new text buffer exceed TEXT_BUFFER_SIZE?
+    if(prv_buffer_len + input_txt_len > TEXT_BUFFER_SIZE) {
         uint16_t new_start;
-        for(new_start = 0; new_start < old_len; new_start++) {
+        for(new_start = 0; new_start < prv_buffer_len; new_start++) {
             if(textBuffer[new_start] == '\n') {
-                /*If there is enough space break*/
-                if(new_start >= txt_len) {
-                    /*Ignore line breaks*/
+                // /*If there is enough space break*/
+                if(new_start >= input_txt_len) {
+                    // /*Ignore line breaks*/
                     while(textBuffer[new_start] == '\n' || textBuffer[new_start] == '\r') new_start++;
                     break;
                 }
@@ -67,37 +71,33 @@ void terminal_add(const char * txt_in)
 
         /* If it wasn't able to make enough space on line breaks
          * simply forget the oldest characters*/
-        if(new_start == old_len) {
-            new_start = old_len - (512 - txt_len);
+        if(new_start == prv_buffer_len) {
+            new_start = prv_buffer_len - (512 - input_txt_len);
         }
         /*Move the remaining text to the beginning*/
         uint16_t j;
-        for(j = new_start; j < old_len; j++) {
+        for(j = new_start; j < prv_buffer_len; j++) {
             textBuffer[j - new_start] = textBuffer[j];
         }
-        old_len = old_len - new_start;
-        textBuffer[old_len] = '\0';
+        prv_buffer_len = prv_buffer_len - new_start;
+        textBuffer[prv_buffer_len] = '\0';
 
     }
 
-    memcpy(&textBuffer[old_len], txt_in, txt_len);
-    textBuffer[old_len + txt_len] = '\0';
+    memcpy(&textBuffer[prv_buffer_len], txt_in, input_txt_len);
+    textBuffer[prv_buffer_len + input_txt_len] = '\0';
 }
 
-
-void addToTextBuffer(char* text) {
-    char tmpStr[TEXT_BUFFER_WIDTH];
-
-    sprintf(tmpStr, "%s", text);
-    memcpy(textBuffer, tmpStr, TEXT_BUFFER_WIDTH);
-
-}
 
 void cb_add_to_console(lv_timer_t * timer) {
   // append to the buffer
-  terminal_add("test\n");
+  static char txt[340];
+  snprintf(txt, 340, "%d - test\n", i);
+  monitor_add(txt);
   // set label
   lv_label_set_text_static(consoleLabel, textBuffer);
+  
+  i++;
 }
 
 void cb_check_wifi_connection(lv_timer_t * timer) {
