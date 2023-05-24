@@ -27,14 +27,15 @@ LV_FONT_DECLARE(cloud_30px);
 static lv_obj_t * consoleLabel;
 
 
-#define TEXT_BUFFER_SIZE 512
-static char textBuffer[TEXT_BUFFER_SIZE + 1]; // + '\0'
+#define MAX_TEXT_BUFFER_SZ 512
+static char textBuffer[MAX_TEXT_BUFFER_SZ + 1]; // + '\0'
 
 #define DISPLAY_WIDTH 240
 
 int i = 0;
 
 // Adds data to the monitor
+// Referenced: https://github.com/lvgl/lv_demos/blob/release/v6/lv_apps/terminal/terminal.c
 void monitor_add(const char * txt_in)
 {
     // size of text passed into this function
@@ -44,47 +45,44 @@ void monitor_add(const char * txt_in)
 
     // TODO
     // is the data longer than the label's width?
-/*     if (input_txt_len > DISPLAY_WIDTH) {
+    /*     if (input_txt_len > DISPLAY_WIDTH) {
       // trim the input text down to DISPLAY_WIDTH
-
       // modify the buffer to show "..." at the end instead
-      
       // re-calculate input_text_len with the new txt_in
       input_txt_len = strlen(txt_in);
     } */
 
-    /*If the text become too long 'forget' the oldest lines*/
-
-    // Does the new text buffer exceed TEXT_BUFFER_SIZE?
-    if(prv_buffer_len + input_txt_len > TEXT_BUFFER_SIZE) {
+    // Check if the new buffer size will exceed MAX_TEXT_BUFFER_SZ
+    if(prv_buffer_len + input_txt_len > MAX_TEXT_BUFFER_SZ) {
         uint16_t new_start;
         for(new_start = 0; new_start < prv_buffer_len; new_start++) {
             if(textBuffer[new_start] == '\n') {
-                // /*If there is enough space break*/
+                // Is there enough space for the new text?
                 if(new_start >= input_txt_len) {
-                    // /*Ignore line breaks*/
+                    // Wait until a non-newline/return char. is found
                     while(textBuffer[new_start] == '\n' || textBuffer[new_start] == '\r') new_start++;
+                    // Enough space has been made in the buffer
                     break;
                 }
             }
         }
 
-        /* If it wasn't able to make enough space on line breaks
-         * simply forget the oldest characters*/
-        if(new_start == prv_buffer_len) {
-            new_start = prv_buffer_len - (512 - input_txt_len);
-        }
-        /*Move the remaining text to the beginning*/
-        uint16_t j;
-        for(j = new_start; j < prv_buffer_len; j++) {
+        // There wasn't enough space to make room for the new characters
+        if(new_start == prv_buffer_len)
+            new_start = prv_buffer_len - (512 - input_txt_len); // discard old text in favor of input text
+        
+        // Move the new text into the beginning of the buffer
+        for(uint16_t j = new_start; j < prv_buffer_len; j++) {
+            // Copy each character to the buffer and shift it to the beginning
             textBuffer[j - new_start] = textBuffer[j];
         }
         prv_buffer_len = prv_buffer_len - new_start;
         textBuffer[prv_buffer_len] = '\0';
-
     }
 
+    // Update textBuffer with the new contents
     memcpy(&textBuffer[prv_buffer_len], txt_in, input_txt_len);
+    // Add a '\0' to the end of the textBuffer
     textBuffer[prv_buffer_len + input_txt_len] = '\0';
 }
 
