@@ -24,9 +24,84 @@
 LV_FONT_DECLARE(wifi_30px);
 LV_FONT_DECLARE(cloud_30px);
 
+static lv_obj_t * consoleLabel;
+
+// Text buffer of 6 lines with 40 characters each
+// TODO: These numbers may change, not sure if accurate
+#define TEXT_BUFFER_HEIGHT 40
+#define TEXT_BUFFER_WIDTH 20
+// TODO: This should be [] not NxN [][]
+//static char * textBuffer[TEXT_BUFFER_WIDTH][TEXT_BUFFER_HEIGHT] = {{" "}};
+//static char *textBuffer[513]; // 512 characters + '\0' null char.
+static char textBuffer[512 + 1];
+
+/**
+ * Add data to the terminal
+ * @param txt_in character sting to add to the terminal
+ */
+void terminal_add(const char * txt_in)
+{
+
+    size_t txt_len = strlen(txt_in);
+    size_t old_len = strlen(textBuffer);
+
+    /*If the data is longer then the terminal ax size show the last part of data*/
+    if(txt_len > 512) {
+        txt_in += (txt_len - 512);
+        txt_len = 512;
+        old_len = 0;
+    }
+    /*If the text become too long 'forget' the oldest lines*/
+    else if(old_len + txt_len > 512) {
+        uint16_t new_start;
+        for(new_start = 0; new_start < old_len; new_start++) {
+            if(textBuffer[new_start] == '\n') {
+                /*If there is enough space break*/
+                if(new_start >= txt_len) {
+                    /*Ignore line breaks*/
+                    while(textBuffer[new_start] == '\n' || textBuffer[new_start] == '\r') new_start++;
+                    break;
+                }
+            }
+        }
+
+        /* If it wasn't able to make enough space on line breaks
+         * simply forget the oldest characters*/
+        if(new_start == old_len) {
+            new_start = old_len - (512 - txt_len);
+        }
+        /*Move the remaining text to the beginning*/
+        uint16_t j;
+        for(j = new_start; j < old_len; j++) {
+            textBuffer[j - new_start] = textBuffer[j];
+        }
+        old_len = old_len - new_start;
+        textBuffer[old_len] = '\0';
+
+    }
+
+    memcpy(&textBuffer[old_len], txt_in, txt_len);
+    textBuffer[old_len + txt_len] = '\0';
+}
+
+
+void addToTextBuffer(char* text) {
+    char tmpStr[TEXT_BUFFER_WIDTH];
+
+    sprintf(tmpStr, "%s", text);
+    memcpy(textBuffer, tmpStr, TEXT_BUFFER_WIDTH);
+
+}
+
+void cb_add_to_console(lv_timer_t * timer) {
+  // append to the buffer
+  terminal_add("test\n");
+  // set label
+  lv_label_set_text_static(consoleLabel, textBuffer);
+}
+
 void cb_check_wifi_connection(lv_timer_t * timer) {
   bool stillConnected = true; // TODO: This will be replaced w/a call to networkStatus()
-
 }
 
 
@@ -67,7 +142,20 @@ void load_task() {
 
   // Add a label to hold console text
   // TODO: Speed this up via https://docs.lvgl.io/8.2/widgets/core/label.html#very-long-texts
-  lv_obj_t * labelConsoleText = lv_label_create(lv_scr_act());
+  consoleLabel = lv_label_create(lv_scr_act());
+  lv_obj_align(consoleLabel, LV_ALIGN_BOTTOM_LEFT, 5, 0);
+  lv_label_set_long_mode(consoleLabel, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(consoleLabel, 240);
+  
+  static lv_style_t styleConsoleLabel;
+  lv_style_init(&styleConsoleLabel);
+  lv_style_set_text_color(&styleConsoleLabel, lv_color_white());
+  lv_obj_add_style(consoleLabel, &styleConsoleLabel, LV_PART_MAIN);
+  lv_label_set_text_static(consoleLabel, textBuffer);
+  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 2500,  NULL);
+
+
+/*   labelConsoleText = lv_label_create(lv_scr_act());
   lv_label_set_long_mode(labelConsoleText, LV_LABEL_LONG_WRAP);
   lv_obj_align(labelConsoleText, LV_ALIGN_BOTTOM_LEFT, 5, 0);  
   static lv_style_t styleConsoleText;
@@ -75,6 +163,8 @@ void load_task() {
   lv_style_set_text_color(&styleConsoleText, lv_color_white());
   lv_obj_add_style(labelConsoleText, &styleConsoleText, LV_PART_MAIN);
   lv_label_set_text(labelConsoleText, "hello"); // TODO: may want to delete and only use when required
+ */
+
 }
 
 
