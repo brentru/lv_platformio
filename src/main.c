@@ -20,8 +20,10 @@
 /**********************
  *      FONTS
  **********************/
-//LV_FONT_DECLARE(turtle_20);
-extern lv_font_t turtle_20; 
+extern lv_font_t turtle_20;
+
+
+
 static lv_obj_t * consoleLabel;
 
 #define MAX_TEXT_BUFFER_SZ 215
@@ -117,16 +119,16 @@ void load_task() {
   lv_obj_align(statusbar_icon_wifi, LV_ALIGN_TOP_RIGHT, -30, 5);
 
   // Add Turtle icon to status bar
-  lv_obj_t * labelTurtleBar = lv_label_create(lv_scr_act());
+  lv_obj_t *labelTurtleBar = lv_label_create(lv_scr_act());
   lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE);
-
-  static lv_style_t  styleIconTurtle30px;
+  static lv_style_t styleIconTurtle30px;
   lv_style_init(&styleIconTurtle30px);
   lv_style_set_text_color(&styleIconTurtle30px,
                           lv_palette_main(LV_PALETTE_GREEN));
   lv_style_set_text_font(&styleIconTurtle30px, &turtle_20);
-  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30px, LV_PART_MAIN);
-  lv_obj_align(labelTurtleBar, LV_ALIGN_TOP_MID, 0, 0);
+  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30px,
+                   LV_PART_MAIN);
+  lv_obj_align(labelTurtleBar, LV_ALIGN_TOP_LEFT, 5, 5);
 
 
   // Add a label to hold console text
@@ -141,6 +143,7 @@ void load_task() {
   lv_style_set_text_color(&styleConsoleLabel, lv_color_white());
   lv_obj_add_style(consoleLabel, &styleConsoleLabel, LV_PART_MAIN);
   lv_label_set_text_static(consoleLabel, textBuffer);
+  lv_obj_move_background(consoleLabel);
   lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 500,  NULL);
 
 }
