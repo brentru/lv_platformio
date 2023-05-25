@@ -15,17 +15,14 @@
 /**********************
  *      MACROS
  **********************/
-#define SYMBOL_WIFI_30PX "\xEF\x87\xAB"
-#define SYMBOL_CLOUD "\xEF\x83\x82"
+#define SYMBOL_TURTLE "\xEF\x9C\xA6"
 
 /**********************
  *      FONTS
  **********************/
-LV_FONT_DECLARE(wifi_30px);
-LV_FONT_DECLARE(cloud_30px);
-
+//LV_FONT_DECLARE(turtle_20);
+extern lv_font_t turtle_20; 
 static lv_obj_t * consoleLabel;
-
 
 #define MAX_TEXT_BUFFER_SZ 215
 static char textBuffer[MAX_TEXT_BUFFER_SZ + 1]; // + '\0'
@@ -38,8 +35,6 @@ int i = 0;
 // Referenced: https://github.com/lvgl/lv_demos/blob/release/v6/lv_apps/terminal/terminal.c
 void monitor_add(const char * txt_in)
 {
-    //if(win == NULL) return;                 /*Check if the window is exists*/
-
     size_t txt_len = strlen(txt_in);
     size_t old_len = strlen(textBuffer);
 
@@ -80,9 +75,7 @@ void monitor_add(const char * txt_in)
 
     memcpy(&textBuffer[old_len], txt_in, txt_len);
     textBuffer[old_len + txt_len] = '\0';
-    //lv_win_focus(win, clr_btn, TERMINAL_ANIM_TIME);
 }
-
 
 void cb_add_to_console(lv_timer_t * timer) {
   // append to the buffer
@@ -94,12 +87,6 @@ void cb_add_to_console(lv_timer_t * timer) {
   
   i++;
 }
-
-void cb_check_wifi_connection(lv_timer_t * timer) {
-  bool stillConnected = true; // TODO: This will be replaced w/a call to networkStatus()
-}
-
-
 
 void load_task() {
   printf("in load_task\n");
@@ -116,49 +103,45 @@ void load_task() {
   lv_draw_rect_dsc_init(&rect_dsc);
   lv_canvas_draw_rect(canvas, 0, 0, 240, 25, &rect_dsc);
 
-  // WiFi Icon
-  // TODO: Timer to check if we are still connected to WiFi levels every 2000ms
-  lv_timer_t * timer = lv_timer_create(cb_check_wifi_connection, 2000, NULL);
-  lv_obj_t * statusbar_icon_wifi = lv_label_create(lv_scr_act());
-  lv_label_set_text(statusbar_icon_wifi, SYMBOL_WIFI_30PX);
-  lv_obj_align(statusbar_icon_wifi, LV_ALIGN_TOP_RIGHT, -5, 5);
+  // Add battery icon to status bar
+  // TODO: Optional timer to check battery level on some boards
+  // Note: FunHouse won't require this and should always be have a full battery displayed
+  lv_obj_t * statusbar_icon_bat = lv_label_create(lv_scr_act());
+  lv_label_set_text(statusbar_icon_bat, LV_SYMBOL_BATTERY_FULL);
+  lv_obj_align(statusbar_icon_bat, LV_ALIGN_TOP_RIGHT, -5, 6);
 
-  // Add cloud
-  // TODO: The cloud is too large, try a 20px version instead
-/*   lv_obj_t * labelCloudBar = lv_label_create(lv_scr_act());
-  lv_label_set_text(labelCloudBar, SYMBOL_CLOUD);
-  static lv_style_t styleIconCloud;
-  lv_style_init(&styleIconCloud);
-  lv_style_set_text_color(&styleIconCloud, lv_color_black());
-  lv_style_set_text_font(&styleIconCloud, &cloud_30px);
-  lv_obj_add_style(labelCloudBar, &styleIconCloud, LV_PART_MAIN);
-  lv_obj_align(labelCloudBar, LV_ALIGN_TOP_RIGHT, -25, 0); */
+  // Add WiFi icon to status bar
+  // TODO: Timer to check if we are still connected to WiFi levels every 2000ms
+  lv_obj_t * statusbar_icon_wifi = lv_label_create(lv_scr_act());
+  lv_label_set_text(statusbar_icon_wifi, LV_SYMBOL_WIFI);
+  lv_obj_align(statusbar_icon_wifi, LV_ALIGN_TOP_RIGHT, -30, 5);
+
+  // Add Turtle icon to status bar
+  lv_obj_t * labelTurtleBar = lv_label_create(lv_scr_act());
+  lv_label_set_text(labelTurtleBar, SYMBOL_TURTLE);
+
+  static lv_style_t  styleIconTurtle30px;
+  lv_style_init(&styleIconTurtle30px);
+  lv_style_set_text_color(&styleIconTurtle30px,
+                          lv_palette_main(LV_PALETTE_GREEN));
+  lv_style_set_text_font(&styleIconTurtle30px, &turtle_20);
+  lv_obj_add_style(labelTurtleBar, &styleIconTurtle30px, LV_PART_MAIN);
+  lv_obj_align(labelTurtleBar, LV_ALIGN_TOP_MID, 0, 0);
 
 
   // Add a label to hold console text
   // TODO: Speed this up via https://docs.lvgl.io/8.2/widgets/core/label.html#very-long-texts
   consoleLabel = lv_label_create(lv_scr_act());
   lv_obj_align(consoleLabel, LV_ALIGN_BOTTOM_LEFT, 5, -5);
+  // TODO: Test long-mode...
   //lv_label_set_long_mode(consoleLabel, LV_LABEL_LONG_WRAP);
   lv_obj_set_width(consoleLabel, 240);
-  
   static lv_style_t styleConsoleLabel;
   lv_style_init(&styleConsoleLabel);
   lv_style_set_text_color(&styleConsoleLabel, lv_color_white());
   lv_obj_add_style(consoleLabel, &styleConsoleLabel, LV_PART_MAIN);
   lv_label_set_text_static(consoleLabel, textBuffer);
   lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 500,  NULL);
-
-
-/*   labelConsoleText = lv_label_create(lv_scr_act());
-  lv_label_set_long_mode(labelConsoleText, LV_LABEL_LONG_WRAP);
-  lv_obj_align(labelConsoleText, LV_ALIGN_BOTTOM_LEFT, 5, 0);  
-  static lv_style_t styleConsoleText;
-  lv_style_init(&styleConsoleText);
-  lv_style_set_text_color(&styleConsoleText, lv_color_white());
-  lv_obj_add_style(labelConsoleText, &styleConsoleText, LV_PART_MAIN);
-  lv_label_set_text(labelConsoleText, "hello"); // TODO: may want to delete and only use when required
- */
 
 }
 
