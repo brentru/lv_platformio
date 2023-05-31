@@ -183,18 +183,39 @@ int16_t generate_value() {
     return rand() % 101;
 }
 
-void cb_add_to_console(lv_timer_t * timer) {
-    // Mock: MCP9808 Temperature-only sensor
-    // We dont have the get_i2c_address func here but
-    // its not native to the sensor_event..
-    int16_t i2c_address = 0x18;
+// Mock a MCP9808 Temperature Sensor
+void read_mcp9808() {
     // Create a new sensor event
     sensors_event_t sensorEvent;
+
+    // Mock: MCP9808 Temperature-only sensor
+    int16_t i2c_address = 0x18;
     sensorEvent.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
     sensorEvent.temperature = (float) generate_value();
 
     // Add a sensor_event to the console
     add_to_console_sensor_event(i2c_address, sensorEvent);
+}
+
+// Mock a AHT20 Temperature Sensor
+void read_aht20() {
+    int16_t i2c_address = 0x38;
+    // Create a new sensor event
+    sensors_event_t sensorEvent;
+    // Add temperature event
+    sensorEvent.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
+    sensorEvent.temperature = (float) generate_value();
+    add_to_console_sensor_event(i2c_address, sensorEvent);
+
+    // Add humidity event
+    sensorEvent.type = SENSOR_TYPE_RELATIVE_HUMIDITY;
+    sensorEvent.temperature = (float) generate_value();
+    add_to_console_sensor_event(i2c_address, sensorEvent);
+}
+
+void cb_add_to_console(lv_timer_t * timer) {
+    read_aht20();
+    read_mcp9808();
 }
 
 
