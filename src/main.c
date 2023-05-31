@@ -163,10 +163,8 @@ void monitor_add(const char * txt_in)
     lv_label_set_text_static(consoleLabel, textBuffer);
 }
 
-// TODO: Sensor_event API handling
-// Simulate a sensor with 1x reading
-// Simulate a sensor with 2x readings
 
+// sensor event api handling
 void add_to_console_sensor_event(int16_t i2c_address, sensors_event_t sensor_event) {
   // Only handling temperature and humidity types for now...
   if (sensor_event.type == SENSOR_TYPE_AMBIENT_TEMPERATURE) {
@@ -214,8 +212,12 @@ void read_aht20() {
 }
 
 void cb_add_to_console(lv_timer_t * timer) {
-    read_aht20();
-    read_mcp9808();
+    int r = rand() % 2; // 0 to 1
+    printf("%d", r);
+    if (r == 0)
+        read_aht20();
+    else if (r == 1)
+        read_mcp9808();
 }
 
 
@@ -223,6 +225,7 @@ void cb_add_to_console(lv_timer_t * timer) {
 
 
 void load_task() {
+  srand(time(NULL));
   printf("in load_task\n");
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_STATE_DEFAULT);
 
@@ -276,7 +279,7 @@ void load_task() {
   lv_obj_add_style(consoleLabel, &styleConsoleLabel, LV_PART_MAIN);
   lv_label_set_text_static(consoleLabel, textBuffer);
   lv_obj_move_background(consoleLabel);
-  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 1500,  NULL);
+  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 5000,  NULL);
 
 }
 
