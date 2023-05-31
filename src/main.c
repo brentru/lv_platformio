@@ -11,6 +11,8 @@
 #include "app_hal.h"
 #include "lvgl.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 /**********************
  *      MACROS
@@ -26,14 +28,90 @@ extern lv_font_t turtle_20;
 
 static lv_obj_t * consoleLabel;
 
-#define MAX_TEXT_BUFFER_SZ 215
+#define MAX_TEXT_BUFFER_SZ 430
 static char textBuffer[MAX_TEXT_BUFFER_SZ + 1]; // + '\0'
-
-#define DISPLAY_WIDTH 240
 
 static char txtBuffer[256];
 
-float i = 0.0;
+/** Sensor types */
+typedef enum {
+  SENSOR_TYPE_ACCELEROMETER = (1), /**< Gravity + linear acceleration */
+  SENSOR_TYPE_MAGNETIC_FIELD = (2),
+  SENSOR_TYPE_ORIENTATION = (3),
+  SENSOR_TYPE_GYROSCOPE = (4),
+  SENSOR_TYPE_LIGHT = (5),
+  SENSOR_TYPE_PRESSURE = (6),
+  SENSOR_TYPE_PROXIMITY = (8),
+  SENSOR_TYPE_GRAVITY = (9),
+  SENSOR_TYPE_LINEAR_ACCELERATION =
+      (10), /**< Acceleration not including gravity */
+  SENSOR_TYPE_ROTATION_VECTOR = (11),
+  SENSOR_TYPE_RELATIVE_HUMIDITY = (12),
+  SENSOR_TYPE_AMBIENT_TEMPERATURE = (13),
+  SENSOR_TYPE_OBJECT_TEMPERATURE = (14),
+  SENSOR_TYPE_VOLTAGE = (15),
+  SENSOR_TYPE_CURRENT = (16),
+  SENSOR_TYPE_COLOR = (17),
+  SENSOR_TYPE_TVOC = (18),
+  SENSOR_TYPE_VOC_INDEX = (19),
+  SENSOR_TYPE_NOX_INDEX = (20),
+  SENSOR_TYPE_CO2 = (21),
+  SENSOR_TYPE_ECO2 = (22),
+  SENSOR_TYPE_PM10_STD = (23),
+  SENSOR_TYPE_PM25_STD = (24),
+  SENSOR_TYPE_PM100_STD = (25),
+  SENSOR_TYPE_PM10_ENV = (26),
+  SENSOR_TYPE_PM25_ENV = (27),
+  SENSOR_TYPE_PM100_ENV = (28),
+  SENSOR_TYPE_GAS_RESISTANCE = (29),
+  SENSOR_TYPE_UNITLESS_PERCENT = (30)
+} sensors_type_t;
+
+
+/* Sensor event (36 bytes) */
+/** struct sensor_event_s is used to provide a single sensor event in a common
+ * format. */
+typedef struct {
+  int32_t version;   /**< must be sizeof(struct sensors_event_t) */
+  int32_t sensor_id; /**< unique sensor identifier */
+  int32_t type;      /**< sensor type */
+  int32_t reserved0; /**< reserved */
+  int32_t timestamp; /**< time is in milliseconds */
+  union {
+    float data[4];              ///< Raw Data
+    float temperature; /**< temperature is in degrees centigrade (Celsius) */
+    float distance;    /**< distance in centimeters */
+    float light;       /**< light in SI lux units */
+    float pressure;    /**< pressure in hectopascal (hPa) */
+    float relative_humidity; /**< relative humidity in percent */
+    float current;           /**< current in milliamps (mA) */
+    float voltage;           /**< voltage in volts (V) */
+    float tvoc;              /**< Total Volatile Organic Compounds, in ppb */
+    float voc_index; /**< VOC (Volatile Organic Compound) index where 100 is
+                          normal (unitless) */
+    float nox_index; /**< NOx (Nitrogen Oxides) index where 100 is normal
+                          (unitless) */
+    float CO2;       /**< Measured CO2 in parts per million (ppm) */
+    float eCO2;      /**< equivalent/estimated CO2 in parts per million (ppm
+                        estimated from some other measurement) */
+    float pm10_std;  /**< Standard Particulate Matter <=1.0 in parts per million
+                        (ppm) */
+    float pm25_std;  /**< Standard Particulate Matter <=2.5 in parts per million
+                        (ppm) */
+    float pm100_std; /**< Standard Particulate Matter <=10.0 in parts per
+                        million (ppm) */
+    float pm10_env;  /**< Environmental Particulate Matter <=1.0 in parts per
+                        million (ppm) */
+    float pm25_env;  /**< Environmental Particulate Matter <=2.5 in parts per
+                        million (ppm) */
+    float pm100_env; /**< Environmental Particulate Matter <=10.0 in parts per
+                        million (ppm) */
+    float gas_resistance;   /**< Proportional to the amount of VOC particles in
+                               the air (Ohms) */
+    float unitless_percent; /**<Percentage, unit-less (%) */
+  };                        ///< Union for the wide ranges of data we can carry
+} sensors_event_t;
+
 
 // Adds data to the monitor
 // Referenced: https://github.com/lvgl/lv_demos/blob/release/v6/lv_apps/terminal/terminal.c
@@ -85,36 +163,38 @@ void monitor_add(const char * txt_in)
     lv_label_set_text_static(consoleLabel, textBuffer);
 }
 
-//  Used for sending text to the display
-/* void add_to_console(char *text, const char *format, bool value) {
-  snprintf(txtBuffer, 256, text, format, value);
+// TODO: Sensor_event API handling
+// Simulate a sensor with 1x reading
+// Simulate a sensor with 2x readings
+
+void add_to_console_sensor_event(int16_t i2c_address, sensors_event_t sensor_event) {
+  // Only handling temperature and humidity types for now...
+  if (sensor_event.type == SENSOR_TYPE_AMBIENT_TEMPERATURE) {
+    snprintf(txtBuffer, 256, "[I2C, 0x%d] Temp.: %0.2f *F\n", i2c_address, sensor_event.temperature);
+  } else if (sensor_event.type == SENSOR_TYPE_RELATIVE_HUMIDITY) {
+    snprintf(txtBuffer, 256, "[I2C, 0x%d] Humid.: %0.2f RH\n", i2c_address, sensor_event.relative_humidity);
+  }
+
   monitor_add(txtBuffer);
 }
 
-void add_to_console(char *text, const char *format, int value) {
-  snprintf(txtBuffer, 256, text, format, value);
-  monitor_add(txtBuffer);
-} */
-
-void add_to_console_f(char *text, float value) {
-  snprintf(txtBuffer, 256, text, value);
-  monitor_add(txtBuffer);
-}
-
-
-// Value from sensor
-void add_to_console_i2c(char *text, int sensor_address, float value) {
-  snprintf(txtBuffer, 256, text, sensor_address, value);
-  monitor_add(txtBuffer);
+// Generate a mock sensor value between 1 and 100
+int16_t generate_value() {
+    return rand() % 101;
 }
 
 void cb_add_to_console(lv_timer_t * timer) {
-  // TODO: Randomize this?
-  printf("add_to_console");
-  //add_to_console_f("Sending Pin A2 Value: %0.2f\n", i);
-  add_to_console_i2c("Sensor 0x%d Value: %0.2f\n", 0x48, i);
+    // Mock: MCP9808 Temperature-only sensor
+    // We dont have the get_i2c_address func here but
+    // its not native to the sensor_event..
+    int16_t i2c_address = 0x18;
+    // Create a new sensor event
+    sensors_event_t sensorEvent;
+    sensorEvent.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
+    sensorEvent.temperature = (float) generate_value();
 
-  i+=0.5;
+    // Add a sensor_event to the console
+    add_to_console_sensor_event(i2c_address, sensorEvent);
 }
 
 
@@ -175,7 +255,7 @@ void load_task() {
   lv_obj_add_style(consoleLabel, &styleConsoleLabel, LV_PART_MAIN);
   lv_label_set_text_static(consoleLabel, textBuffer);
   lv_obj_move_background(consoleLabel);
-  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 300,  NULL);
+  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 1500,  NULL);
 
 }
 
