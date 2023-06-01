@@ -368,8 +368,10 @@ void load_task() {
 
   // Add a label to hold console text
   // TODO: Speed this up via https://docs.lvgl.io/8.2/widgets/core/label.html#very-long-texts
+  // TODO: Still having some overlap between the top console text and the
+  // status bar..
   consoleLabel = lv_label_create(lv_scr_act());
-  lv_obj_align(consoleLabel, LV_ALIGN_BOTTOM_LEFT, 3, -5);
+  lv_obj_align(consoleLabel, LV_ALIGN_BOTTOM_LEFT, 3, 0);
   lv_obj_set_width(consoleLabel, 230);
   lv_label_set_long_mode(consoleLabel, LV_LABEL_LONG_WRAP);
   static lv_style_t styleConsoleLabel;
