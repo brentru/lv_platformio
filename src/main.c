@@ -369,10 +369,9 @@ void load_task() {
   // Add a label to hold console text
   // TODO: Speed this up via https://docs.lvgl.io/8.2/widgets/core/label.html#very-long-texts
   consoleLabel = lv_label_create(lv_scr_act());
-  lv_obj_align(consoleLabel, LV_ALIGN_BOTTOM_LEFT, 5, -5);
-  // TODO: Test long-mode...
-  //lv_label_set_long_mode(consoleLabel, LV_LABEL_LONG_WRAP);
-  lv_obj_set_width(consoleLabel, 240);
+  lv_obj_align(consoleLabel, LV_ALIGN_BOTTOM_LEFT, 3, -5);
+  lv_obj_set_width(consoleLabel, 230);
+  lv_label_set_long_mode(consoleLabel, LV_LABEL_LONG_WRAP);
   static lv_style_t styleConsoleLabel;
   lv_style_init(&styleConsoleLabel);
   lv_style_set_text_color(&styleConsoleLabel, lv_color_white());
