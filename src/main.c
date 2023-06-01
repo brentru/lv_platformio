@@ -228,6 +228,31 @@ void add_to_console_analog_in(uint8_t pinName, float pinValue, bool isRawMode) {
   monitor_add(txtBuffer);
 }
 
+void add_to_console_ping() {
+    snprintf(txtBuffer, 256, "[Net] Ping IO\n");
+}
+
+void add_to_console_pwm_tone(uint8_t pin, uint32_t freq) {
+  snprintf(txtBuffer, 256, "[PWM] Writing %uHz to pin %u\n", freq, pin);
+  monitor_add(txtBuffer);
+}
+
+void add_to_console_pwm_dc(uint8_t pin, uint32_t duty_cycle) {
+  snprintf(txtBuffer, 256, "[PWM] Writing duty cycle of %u to pin %u\n", duty_cycle, pin);
+  monitor_add(txtBuffer);
+}
+
+void add_to_console_servo_write(int pin, int value) {
+  snprintf(txtBuffer, 256, "[Servo] Writing value %d to pin %d\n", value, pin);
+  monitor_add(txtBuffer);
+}
+
+void add_to_console_strand_write(int strandIdx, uint32_t rgbColor) {
+  snprintf(txtBuffer, 256, "[Pixel] Writing color %u to strand # %d\n", rgbColor, strandIdx);
+  monitor_add(txtBuffer);
+}
+
+
 void add_to_console_component_init() {
   snprintf(txtBuffer, 256, "[Pin] Configured analog output A%u\n", 0);
   monitor_add(txtBuffer);
@@ -249,25 +274,50 @@ void add_to_console_component_init() {
 }
 
 void cb_add_to_console(lv_timer_t * timer) {
-    int r = rand() % 6;
-    printf("Rand: %d\n", r);
-    if (r == 0)
+    int r = rand() % 12; // generate a random function callback
+
+    switch (r)
+    {
+    // I2C
+    case 0:
         read_aht20();
-    else if (r == 1)
+        break;
+    case 1:
         read_mcp9808();
-    else if (r == 2)
+        break;
+    // Digital IO
+    case 2:
         add_to_console_digital_io(4, r, 0);
-    else if (r == 3)
+        break;
+    case 3:
         add_to_console_digital_io(5, r, 1);
-    else if (r == 4)
+        break;
+    // Analog IO
+    case 4:
         add_to_console_analog_in(0, 0.052, 0);
-    else if (r == 5)
+        break;
+    case 5:
         add_to_console_analog_in(1, 0.3, 1);
-    // TODO: Analog Input
-    // TODO: Analog/PWM Output
-    // TODO: Servo Output
-    // TODO: NeoPixel Output
-    // TODO: Ping message
+        break;
+    // PWM
+    case 6:
+        add_to_console_pwm_tone(0, 400);
+        break;
+    case 7:
+        add_to_console_pwm_dc(0, 20);
+        break;
+    case 8:
+        add_to_console_servo_write(3, 256);
+        break;
+    // NeoPixel
+    case 9:
+        add_to_console_strand_write(1, 0xFFFF);
+        break;
+    case 10:
+        add_to_console_ping();
+    default:
+        break;
+    }
 }
 
 
