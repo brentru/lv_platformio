@@ -216,12 +216,40 @@ void add_to_console_digital_io(uint8_t pinName, int pinValue, bool isInput) {
   if (isInput)
     snprintf(txtBuffer, 256, "[Pin] D%u Read: %d\n", pinName, pinValue);
   else
-    snprintf(txtBuffer, 256, "[Pin] Set D%u to: %d\n", pinName, pinValue);
+    snprintf(txtBuffer, 256, "[Pin] Set D%u to %d\n", pinName, pinValue);
+  monitor_add(txtBuffer);
+}
+
+void add_to_console_analog_in(uint8_t pinName, float pinValue, bool isRawMode) {
+  if (isRawMode)
+    snprintf(txtBuffer, 256, "[Pin] A%u Read: %0.3f\n", pinName, pinValue);
+  else
+    snprintf(txtBuffer, 256, "[Pin] A%u Read: %0.3fv\n", pinName, pinValue);
+  monitor_add(txtBuffer);
+}
+
+void add_to_console_component_init() {
+  snprintf(txtBuffer, 256, "[Pin] Configured analog output A%u\n", 0);
+  monitor_add(txtBuffer);
+
+  snprintf(txtBuffer, 256, "[Pin] Configured digital input D%u\n", 10);
+  monitor_add(txtBuffer);
+
+  snprintf(txtBuffer, 256, "[I2C] Configured sensor at 0x%x\n", 0x40);
+  monitor_add(txtBuffer);
+
+  snprintf(txtBuffer, 256, "[NeoPixel] Configured strand on D%d\n", 5);
+  monitor_add(txtBuffer);
+
+  snprintf(txtBuffer, 256, "[Servo] Configured servo on pin %d with min. pulse width of %duS and a max. pulse width of %duS\n", 12, 0, 1500);
+  monitor_add(txtBuffer);
+
+  snprintf(txtBuffer, 256, "[PWM] Configured PWM output on pin %d with freq. of %d Hz\n", 7, 300);
   monitor_add(txtBuffer);
 }
 
 void cb_add_to_console(lv_timer_t * timer) {
-    int r = rand() % 4;
+    int r = rand() % 6;
     printf("Rand: %d\n", r);
     if (r == 0)
         read_aht20();
@@ -231,8 +259,10 @@ void cb_add_to_console(lv_timer_t * timer) {
         add_to_console_digital_io(4, r, 0);
     else if (r == 3)
         add_to_console_digital_io(5, r, 1);
-    // TODO: Digital Input
-    // TODO: Digital Output
+    else if (r == 4)
+        add_to_console_analog_in(0, 0.052, 0);
+    else if (r == 5)
+        add_to_console_analog_in(1, 0.3, 1);
     // TODO: Analog Input
     // TODO: Analog/PWM Output
     // TODO: Servo Output
@@ -299,7 +329,9 @@ void load_task() {
   lv_obj_add_style(consoleLabel, &styleConsoleLabel, LV_PART_MAIN);
   lv_label_set_text_static(consoleLabel, textBuffer);
   lv_obj_move_background(consoleLabel);
-  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 1000,  NULL);
+  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 7500,  NULL);
+
+  add_to_console_component_init();
 
 }
 
