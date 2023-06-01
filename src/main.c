@@ -166,11 +166,12 @@ void monitor_add(const char * txt_in)
 
 // sensor event api handling
 void add_to_console_sensor_event(int16_t i2c_address, sensors_event_t sensor_event) {
+  // TODO: maybe a memset to clear buffer first?
   // Only handling temperature and humidity types for now...
   if (sensor_event.type == SENSOR_TYPE_AMBIENT_TEMPERATURE) {
-    snprintf(txtBuffer, 256, "[I2C, 0x%d] Temp.: %0.2f *F\n", i2c_address, sensor_event.temperature);
+    snprintf(txtBuffer, 256, "[I2C, 0x%x] Temp.: %0.2f *F\n", i2c_address, sensor_event.temperature);
   } else if (sensor_event.type == SENSOR_TYPE_RELATIVE_HUMIDITY) {
-    snprintf(txtBuffer, 256, "[I2C, 0x%d] Humid.: %0.2f RH\n", i2c_address, sensor_event.relative_humidity);
+    snprintf(txtBuffer, 256, "[I2C, 0x%x] Humid.: %0.2f RH\n", i2c_address, sensor_event.relative_humidity);
   }
 
   monitor_add(txtBuffer);
@@ -211,13 +212,32 @@ void read_aht20() {
     add_to_console_sensor_event(i2c_address, sensorEvent);
 }
 
+void add_to_console_digital_io(uint8_t pinName, int pinValue, bool isInput) {
+  if (isInput)
+    snprintf(txtBuffer, 256, "[Pin] D%u Read: %d\n", pinName, pinValue);
+  else
+    snprintf(txtBuffer, 256, "[Pin] Set D%u to: %d\n", pinName, pinValue);
+  monitor_add(txtBuffer);
+}
+
 void cb_add_to_console(lv_timer_t * timer) {
-    int r = rand() % 2; // 0 to 1
-    printf("%d", r);
+    int r = rand() % 4;
+    printf("Rand: %d\n", r);
     if (r == 0)
         read_aht20();
     else if (r == 1)
         read_mcp9808();
+    else if (r == 2)
+        add_to_console_digital_io(4, r, 0);
+    else if (r == 3)
+        add_to_console_digital_io(5, r, 1);
+    // TODO: Digital Input
+    // TODO: Digital Output
+    // TODO: Analog Input
+    // TODO: Analog/PWM Output
+    // TODO: Servo Output
+    // TODO: NeoPixel Output
+    // TODO: Ping message
 }
 
 
@@ -279,7 +299,7 @@ void load_task() {
   lv_obj_add_style(consoleLabel, &styleConsoleLabel, LV_PART_MAIN);
   lv_label_set_text_static(consoleLabel, textBuffer);
   lv_obj_move_background(consoleLabel);
-  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 5000,  NULL);
+  lv_timer_t * timer_cb_console = lv_timer_create(cb_add_to_console, 1000,  NULL);
 
 }
 
